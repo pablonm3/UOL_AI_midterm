@@ -22,23 +22,25 @@ DEFAULT_PARAMS = {
 }
 
 EXPERIMENTS = [
-    {"name": "test", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS", "X":{"iterations": [20]}},
-    {"name": "test2", "log_interval": "NORMAL", "Y": "MEAN_FITNESS", "X":{"pop_size": [10, 50,]}, "Z": {"iterations": [100, 300]}},
-    {"name": "no_iterations", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS", "X":{"iterations": [2000]}},
+    {"name": "test", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [20]}},
+    {"name": "test2", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 50,]}, "Z": {"iterations": [10, 30]}},
+    {"name": "test3", "log_interval": "EVERY_ITERATION", "Y": "EVOLUTION_SPEED", "X":{"iterations": [10, 20, 30]}},
+    {"name": "no_iterations", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [2000]}},
     {"name": "no_iterations2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"iterations": [100, 300, 500, 1000, 1500, 2000]}},
-    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS", "X":{"pop_size": [10, 50, 100, 200, 500]}, "Z": {"iterations": [100, 300, 500, 1000]}},
+    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 50, 100, 200, 500]}, "Z": {"iterations": [100, 300, 500, 1000]}},
     {"name": "pop_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pop_size": [10, 50, 100, 200, 500]}},
-    {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS", "X":{"iterations": [100, 300, 500, 1000, 1500, 2000]}, "Z": {"pool_size": [1,4,8]}},
+    {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [100, 300, 500, 1000, 1500, 2000]}, "Z": {"pool_size": [1,4,8]}},
     {"name": "pool_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pool_size": [1, 2 , 4, 8]}},
-    {"name": "init_gene_count", "log_interval": "NORMAL", "Y": "MEAN_FITNESS", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
+    {"name": "init_gene_count", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
     {"name": "init_gene_count2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
-    {"name": "mutation_rate", "log_interval": "NORMAL", "Y": "MEAN_FITNESS", "X":{"mutation_rate": [0.1, 0.3, 0.6, 0.8]}},
+    {"name": "mutation_rate", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"mutation_rate": [0.1, 0.3, 0.6, 0.8]}},
     {"name": "mutation_rate2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"mutation_rate": [0.1, 0.3, 0.6, 0.8]}}
 ]
 
 TEST_EXPERIMENTS_TO_RUN = [
                       "test",
-                      "test2"]
+                      "test2",
+                      "test3"]
 EXPERIMENTS_TO_RUN=  ["no_iterations",
                       "no_iterations2",
                       "pop_size",
@@ -66,22 +68,28 @@ class HyperparamSearcher():
     def get_metric(self, hyperparams, experiment_params, creatures, initial_fitness):
         metric_name = experiment_params["Y"]
         mean_fitness = self.get_mean_fitness(creatures)
-        if(metric_name == "MEAN_FITNESS"):
-            return mean_fitness
+        if(metric_name == "MEAN_FITNESS_DELTA"):
+            return mean_fitness - initial_fitness
         if(metric_name == "EVOLUTION_SPEED"):
             return (mean_fitness - initial_fitness) / hyperparams["iterations"]
 
         raise Exception("Invalid metric")
 
+    def find_exp_w_name(self, name):
+        for e in EXPERIMENTS:
+            if(e["name"] == name):
+                return e
+        return None
+
     def run_experiment(self, experiment_name):
-        experiment_params = EXPERIMENTS[experiment_name]
+        experiment_params = self.find_exp_w_name(experiment_name)
         params = DEFAULT_PARAMS.copy()
         X_dict = experiment_params["X"]
-        X_prop = X_dict.keys()[0] if X_dict else None
+        X_prop = list(X_dict.keys())[0] if X_dict else None
         X_values = X_dict.get(X_prop, [])
         Y_metric = experiment_params["Y"]
         Z_dict = experiment_params.get("Z", {})
-        Z_prop = Z_dict.keys()[0] if Z_dict else None
+        Z_prop = list(Z_dict.keys())[0] if Z_dict else None
         Z_values = Z_dict.get(Z_prop, [])
         log_interval = experiment_params["log_interval"]
         r = []
@@ -100,6 +108,7 @@ class HyperparamSearcher():
 
 
     def run(self, hyperparams, experiment_params, y, x , x_name, z=None, z_name=None, log_interval=None):
+        print("starting experiment with experiment_params: ", experiment_params, " and hyperparams: ", hyperparams)
         logs = []
         no_iterations = hyperparams.get("iterations")
         pop_size = hyperparams.get("pop_size")
@@ -118,8 +127,9 @@ class HyperparamSearcher():
                     for cr in pop.creatures]
             links = [len(cr.get_expanded_links())
                      for cr in pop.creatures]
-            print(iteration, "fittest:", np.round(np.max(fits), 3),
-                  "mean:", np.round(np.mean(fits), 3), "mean links", np.round(np.mean(links)), "max links", np.round(np.max(links)))
+            if(iteration %10 == 0):
+                print(iteration, "fittest:", np.round(np.max(fits), 3),
+                      "mean:", np.round(np.mean(fits), 3), "mean links", np.round(np.mean(links)), "max links", np.round(np.max(links)))
             fit_map = population.Population.get_fitness_map(fits)
             new_creatures = []
             for i in range(len(pop.creatures)):
@@ -142,25 +152,32 @@ class HyperparamSearcher():
                     new_cr = creature.Creature(1)
                     new_cr.update_dna(cr.dna)
                     new_creatures[0] = new_cr
-                    filename = "elite_"+str(iteration)+".csv"
+                    filename = "genomes/elite_"+str(iteration)+".csv"
                     genome.Genome.to_csv(cr.dna, filename)
                     break
             if(iteration == 0):
                 init_fitness = self.get_mean_fitness(pop.creatures)
-            pop.creatures = new_creatures
             if(experiment_params["log_interval"] == "EVERY_ITERATION"):
                 metric = self.get_metric(hyperparams, experiment_params, pop.creatures, initial_fitness=init_fitness)
                 record = {}
                 record[y] = metric
-                record[x_name] = x
+                if(x_name == "iterations"):
+                    record[x_name] = iteration +1
+                else:
+                    record[x_name] = x
                 if(z_name):
                     record[z_name] = z
                 logs.append(record)
+            last_evaluated_creatures = pop.creatures
+            pop.creatures = new_creatures
         if(experiment_params["log_interval"] == "NORMAL"):
-            metric = self.get_metric(hyperparams, experiment_params, pop.creatures, initial_fitness=init_fitness)
+            metric = self.get_metric(hyperparams, experiment_params, last_evaluated_creatures, initial_fitness=init_fitness)
             record = {}
             record[y] = metric
-            record[x_name] = x
+            if(x_name == "iterations"):
+                record[x_name] = iteration +1
+            else:
+                record[x_name] = x
             if(z_name):
                 record[z_name] = z
             logs.append(record)
@@ -168,9 +185,11 @@ class HyperparamSearcher():
 
 if __name__ == '__main__':
     hs = HyperparamSearcher()
-    for experiment_name in TEST_EXPERIMENTS_TO_RUN:
+    for experiment_name in EXPERIMENTS_TO_RUN:
+        print("starting experiment: ", experiment_name)
         results_dataframe = hs.run_experiment(experiment_name)
+        #results_dataframe = pd.DataFrame([{"b": 1}, {"a": 1}])
         print("experiment finished: ", experiment_name)
         print("saving to CSV...")
         path = f"hyperparam_search/{experiment_name}.csv"
-        results_dataframe.to_csv()
+        results_dataframe.to_csv(path, index=False)

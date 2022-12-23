@@ -48,7 +48,7 @@ class TestGA(unittest.TestCase):
                     new_cr = creature.Creature(1)
                     new_cr.update_dna(cr.dna)
                     new_creatures[0] = new_cr
-                    filename = "elite_"+str(iteration)+".csv"
+                    filename = "genomes/elite_"+str(iteration)+".csv"
                     genome.Genome.to_csv(cr.dna, filename)
                     break
             

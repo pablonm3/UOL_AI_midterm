@@ -2,16 +2,16 @@
 	<link name="0">
 		<visual>
 			<geometry>
-				<cylinder length="1.9998" radius="0.11852262176713524"/>
+				<cylinder length="1.848696671994538" radius="0.22291556970490983"/>
 			</geometry>
 		</visual>
 		<collision>
 			<geometry>
-				<cylinder length="1.9998" radius="0.11852262176713524"/>
+				<cylinder length="1.848696671994538" radius="0.22291556970490983"/>
 			</geometry>
 		</collision>
 		<inertial>
-			<mass value="0.08825492213118463"/>
+			<mass value="0.2886000077562378"/>
 			<inertia ixx="0.03" ixy="0" ixz="0" iyx="0" iyy="0.03" izz="0.03"/>
 		</inertial>
 	</link>
