@@ -82,6 +82,22 @@ class HyperparamSearcher():
                 return e
         return None
 
+    def run_wrapper(self, hyperparams, experiment_params, y, x , x_name, z=None, z_name=None, log_interval=None):
+        trial = 0
+        while(True):
+            try:
+                return self.run(hyperparams, experiment_params, y=y, x=x, x_name=x_name, z=z, z_name=z_name,  log_interval=log_interval)
+            except Exception as ex:
+                print("Exception Raised: ", ex)
+                if(trial > 3):
+                    print("skipping experiment for params: ", experiment_params)
+                    print("hyperparams: ", hyperparams)
+                    return []
+                else:
+                    print("Retriying...")
+                    trial += 1
+
+
     def run_experiment(self, experiment_name):
         experiment_params = self.find_exp_w_name(experiment_name)
         params = DEFAULT_PARAMS.copy()
@@ -99,24 +115,11 @@ class HyperparamSearcher():
             if(Z_prop):
                 for Z_value in Z_values:
                     params[Z_prop] = Z_value
-                    while(True):
-                        try:
-                            records = self.run(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, z=Z_value, z_name=Z_prop,  log_interval=log_interval)
-                            r = r + records
-                            break
-                        except Exception as ex:
-                            print("Exception Raised: ", ex)
-                            print("Retriying...")
+                    records = self.run_wrapper(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, z=Z_value, z_name=Z_prop,  log_interval=log_interval)
+                    r = r + records
             else:
-                while(True):
-                    try:
-                        records = self.run(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, log_interval= log_interval)
-                        r = r + records
-                        break;
-                    except Exception as ex:
-                        print("Exception Raised: ", ex)
-                        print("Retriying...")
-
+                records = self.run_wrapper(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, log_interval= log_interval)
+                r = r + records
         df = pd.DataFrame(r)
         return df
 
