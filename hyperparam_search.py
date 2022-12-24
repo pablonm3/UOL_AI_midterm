@@ -19,7 +19,7 @@ DEFAULT_PARAMS = {
     "init_gene_count": 3,
     "iterations": 1000,
     "mutation_rate": 0.1,
-    "pool_size": 12
+    "pool_size": 8
 }
 
 EXPERIMENTS = [
@@ -27,10 +27,10 @@ EXPERIMENTS = [
     {"name": "test2", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 50,]}, "Z": {"iterations": [10, 30]}},
     {"name": "test3", "log_interval": "EVERY_ITERATION", "Y": "EVOLUTION_SPEED", "X":{"iterations": [10, 20, 30]}},
     {"name": "no_iterations", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [2000]}},
-    {"name": "no_iterations2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"iterations": [100, 300, 500, 1000, 1500, 2000]}},
-    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 50, 100, 200, 500]}, "Z": {"iterations": [100, 300, 500, 1000]}},
-    {"name": "pop_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pop_size": [10, 50, 100, 200, 500]}},
-    {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [100, 300, 500, 1000, 1500, 2000]}, "Z": {"pool_size": [1,4,8]}},
+    {"name": "no_iterations2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"iterations": [100, 300, 500, 1000]}},
+    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 50, 100]}, "Z": {"iterations": [100, 300, 500, 1000]}},
+    {"name": "pop_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pop_size": [10, 50, 100]}},
+    {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [100, 300, 500, 1000]}, "Z": {"pool_size": [1,4,8]}},
     {"name": "pool_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pool_size": [1, 2 , 4, 8]}},
     {"name": "init_gene_count", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
     {"name": "init_gene_count2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
