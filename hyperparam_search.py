@@ -41,8 +41,9 @@ TEST_EXPERIMENTS_TO_RUN = [
                       "test",
                       "test2",
                       "test3"]
-EXPERIMENTS_TO_RUN=  ["no_iterations",
-                      "no_iterations2",
+EXPERIMENTS_TO_RUN=  [
+                      #"no_iterations",
+                      #"no_iterations2",
                       "pop_size",
                       "pop_size2",
                       "pool_size",
@@ -98,14 +99,26 @@ class HyperparamSearcher():
             if(Z_prop):
                 for Z_value in Z_values:
                     params[Z_prop] = Z_value
-                    records = self.run(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, z=Z_value, z_name=Z_prop,  log_interval=log_interval)
-                    r = r + records
+                    while(True):
+                        try:
+                            records = self.run(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, z=Z_value, z_name=Z_prop,  log_interval=log_interval)
+                            r = r + records
+                            break
+                        except Exception as ex:
+                            print("Exception Raised: ", ex)
+                            print("Retriying...")
             else:
-                records = self.run(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, log_interval= log_interval)
-                r = r + records
+                while(True):
+                    try:
+                        records = self.run(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, log_interval= log_interval)
+                        r = r + records
+                        break;
+                    except Exception as ex:
+                        print("Exception Raised: ", ex)
+                        print("Retriying...")
+
         df = pd.DataFrame(r)
         return df
-
 
     def run(self, hyperparams, experiment_params, y, x , x_name, z=None, z_name=None, log_interval=None):
         print("starting experiment with experiment_params: ", experiment_params, " and hyperparams: ", hyperparams)
