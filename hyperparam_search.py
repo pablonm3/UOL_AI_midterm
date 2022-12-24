@@ -11,6 +11,7 @@ import genome
 import creature
 import numpy as np
 import pandas as pd
+import time
 
 
 DEFAULT_PARAMS = {
@@ -18,7 +19,7 @@ DEFAULT_PARAMS = {
     "init_gene_count": 3,
     "iterations": 1000,
     "mutation_rate": 0.1,
-    "pool_size": 8
+    "pool_size": 12
 }
 
 EXPERIMENTS = [
@@ -94,7 +95,8 @@ class HyperparamSearcher():
                     print("hyperparams: ", hyperparams)
                     return []
                 else:
-                    print("Retriying...")
+                    print("Retriying in 5 seconds...")
+                    time.sleep(5)
                     trial += 1
 
 
@@ -143,7 +145,7 @@ class HyperparamSearcher():
                     for cr in pop.creatures]
             links = [len(cr.get_expanded_links())
                      for cr in pop.creatures]
-            if(iteration %10 == 0):
+            if(iteration % 50 == 0):
                 print(iteration, "fittest:", np.round(np.max(fits), 3),
                       "mean:", np.round(np.mean(fits), 3), "mean links", np.round(np.mean(links)), "max links", np.round(np.max(links)))
             fit_map = population.Population.get_fitness_map(fits)
