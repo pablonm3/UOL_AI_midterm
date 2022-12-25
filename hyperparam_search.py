@@ -45,14 +45,15 @@ TEST_EXPERIMENTS_TO_RUN = [
 EXPERIMENTS_TO_RUN=  [
                       #"no_iterations",
                       #"no_iterations2",
-                      "pop_size",
-                      "pop_size2",
-                      "pool_size",
-                      "pool_size2",
-                      "init_gene_count",
-                      "init_gene_count2",
-                      "mutation_rate",
-                      "mutation_rate2"]
+                      #"pop_size",
+                      #"pop_size2",
+                      #"pool_size",
+                      #"pool_size2",
+                      #"init_gene_count",
+                     # "init_gene_count2",
+                     # "mutation_rate",
+                      #"mutation_rate2"
+                    ]
 
 class HyperparamSearcher():
 
