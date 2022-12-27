@@ -12,6 +12,8 @@ import creature
 import numpy as np
 import pandas as pd
 import time
+import datetime;
+
 
 
 DEFAULT_PARAMS = {
@@ -28,14 +30,14 @@ EXPERIMENTS = [
     {"name": "test3", "log_interval": "EVERY_ITERATION", "Y": "EVOLUTION_SPEED", "X":{"iterations": [10, 20, 30]}},
     {"name": "no_iterations", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [2000]}},
     {"name": "no_iterations2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"iterations": [100, 300, 500, 1000]}},
-    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 50, 100]}, "Z": {"iterations": [100, 300, 500, 1000]}},
-    {"name": "pop_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pop_size": [10, 50, 100]}},
-    {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [100, 300, 500, 1000]}, "Z": {"pool_size": [1,4,8]}},
+    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [2]}, "Z": {"iterations": [10]}},
+    {"name": "pop_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pop_size": [10, 20, 30, 40, 50, 60, 70, 100]}},
+    {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [100, 150, 300, 400, 500, 1000]}, "Z": {"pool_size": [1,4,8]}},
     {"name": "pool_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pool_size": [1, 2 , 4, 8]}},
-    {"name": "init_gene_count", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
-    {"name": "init_gene_count2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"init_gene_count": [1, 3, 6, 10, 20]}},
-    {"name": "mutation_rate", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"mutation_rate": [0.1, 0.3, 0.6, 0.8]}},
-    {"name": "mutation_rate2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"mutation_rate": [0.1, 0.3, 0.6, 0.8]}}
+    {"name": "init_gene_count", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"init_gene_count": [1, 3, 5,6, 8, 10]}},
+    {"name": "init_gene_count2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"init_gene_count": [1, 3, 5,6, 8, 10]}},
+    {"name": "mutation_rate", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"mutation_rate": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7, 0.8]}},
+    {"name": "mutation_rate2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"mutation_rate": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7, 0.8]}}
 ]
 
 TEST_EXPERIMENTS_TO_RUN = [
@@ -45,14 +47,14 @@ TEST_EXPERIMENTS_TO_RUN = [
 EXPERIMENTS_TO_RUN=  [
                       #"no_iterations",
                       #"no_iterations2",
-                      #"pop_size",
-                      #"pop_size2",
-                      #"pool_size",
+                      "pop_size",
+                      "pop_size2",
+                      "pool_size",
                       #"pool_size2",
-                      #"init_gene_count",
-                     # "init_gene_count2",
-                     # "mutation_rate",
-                      #"mutation_rate2"
+                      "init_gene_count",
+                      "init_gene_count2",
+                      "mutation_rate",
+                      "mutation_rate2"
                     ]
 
 class HyperparamSearcher():
@@ -123,6 +125,8 @@ class HyperparamSearcher():
             else:
                 records = self.run_wrapper(params, experiment_params, y=Y_metric, x=X_value, x_name=X_prop, log_interval= log_interval)
                 r = r + records
+            print("storing intermediate values")
+            store_exp_name(pd.DataFrame(r), experiment_name, is_final=False)
         df = pd.DataFrame(r)
         return df
 
@@ -147,7 +151,7 @@ class HyperparamSearcher():
             links = [len(cr.get_expanded_links())
                      for cr in pop.creatures]
             if(iteration % 50 == 0):
-                print(iteration, "fittest:", np.round(np.max(fits), 3),
+                print("timestamp: ", datetime.datetime.now(), iteration, "fittest:", np.round(np.max(fits), 3),
                       "mean:", np.round(np.mean(fits), 3), "mean links", np.round(np.mean(links)), "max links", np.round(np.max(links)))
             fit_map = population.Population.get_fitness_map(fits)
             new_creatures = []
@@ -202,13 +206,20 @@ class HyperparamSearcher():
             logs.append(record)
         return logs
 
+def store_exp_name(df, experiment_name, is_final=True):
+    dir_name = None
+    if(is_final):
+        print("experiment finished: ", experiment_name)
+        dir_name = "hyperparam_search_V2"
+    else:
+        dir_name = "hyperparam_search_V2_WIP"
+    print("saving to CSV...")
+    path = f"{dir_name}/{experiment_name}.csv"
+    df.to_csv(path, index=False)
+
 if __name__ == '__main__':
     hs = HyperparamSearcher()
     for experiment_name in EXPERIMENTS_TO_RUN:
         print("starting experiment: ", experiment_name)
         results_dataframe = hs.run_experiment(experiment_name)
-        #results_dataframe = pd.DataFrame([{"b": 1}, {"a": 1}])
-        print("experiment finished: ", experiment_name)
-        print("saving to CSV...")
-        path = f"hyperparam_search/{experiment_name}.csv"
-        results_dataframe.to_csv(path, index=False)
+        store_exp_name(results_dataframe, experiment_name)
