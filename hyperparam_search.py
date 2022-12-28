@@ -30,7 +30,7 @@ EXPERIMENTS = [
     {"name": "test3", "log_interval": "EVERY_ITERATION", "Y": "EVOLUTION_SPEED", "X":{"iterations": [10, 20, 30]}},
     {"name": "no_iterations", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [2000]}},
     {"name": "no_iterations2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"iterations": [100, 300, 500, 1000]}},
-    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [2]}, "Z": {"iterations": [10]}},
+    {"name": "pop_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"pop_size": [10, 15, 20,30, 50, 60, 100]}, "Z": {"iterations": [100, 300, 500, 1000]}},
     {"name": "pop_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pop_size": [10, 20, 30, 40, 50, 60, 70, 100]}},
     {"name": "pool_size", "log_interval": "NORMAL", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [100, 150, 300, 400, 500, 1000]}, "Z": {"pool_size": [1,4,8]}},
     {"name": "pool_size2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"pool_size": [1, 2 , 4, 8]}},

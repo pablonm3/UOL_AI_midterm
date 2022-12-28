@@ -2,40 +2,17 @@
 	<link name="0">
 		<visual>
 			<geometry>
-				<cylinder length="1.2050055825401313" radius="0.18290773275572914"/>
+				<cylinder length="0.7967607353490778" radius="0.43004798710737613"/>
 			</geometry>
 		</visual>
 		<collision>
 			<geometry>
-				<cylinder length="1.2050055825401313" radius="0.18290773275572914"/>
+				<cylinder length="0.7967607353490778" radius="0.43004798710737613"/>
 			</geometry>
 		</collision>
 		<inertial>
-			<mass value="0.1266493789566258"/>
+			<mass value="0.4629260655908738"/>
 			<inertia ixx="0.03" ixy="0" ixz="0" iyx="0" iyy="0.03" izz="0.03"/>
 		</inertial>
 	</link>
-	<link name="11">
-		<visual>
-			<geometry>
-				<cylinder length="0.8154769926966201" radius="0.9999"/>
-			</geometry>
-		</visual>
-		<collision>
-			<geometry>
-				<cylinder length="0.8154769926966201" radius="0.9999"/>
-			</geometry>
-		</collision>
-		<inertial>
-			<mass value="2.561384175740279"/>
-			<inertia ixx="0.03" ixy="0" ixz="0" iyx="0" iyy="0.03" izz="0.03"/>
-		</inertial>
-	</link>
-	<joint name="11_to_0" type="revolute">
-		<parent link="0"/>
-		<child link="11"/>
-		<axis xyz="0 1 0"/>
-		<limit effort="1" lower="3.1415" upper="-3.1415" velocity="1"/>
-		<origin rpy="9.187154749586885 4.526911794548183 5.196853465412705" xyz="0.5488228574833086 0.6727352694338915 0.9999"/>
-	</joint>
 </robot>
