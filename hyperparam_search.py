@@ -40,6 +40,21 @@ EXPERIMENTS = [
     {"name": "mutation_rate2", "log_interval": "NORMAL", "Y": "EVOLUTION_SPEED", "X":{"mutation_rate": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7, 0.8]}}
 ]
 
+EXPERIMENTS_GENOME = [
+    {"name": "baseline", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]} },
+    {"name": "link-length-longer1", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-length", 4)  },
+    {"name": "link-length-longer2", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-length", 6)  },
+    {"name": "link-length-shorter1", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-length", 1)  },
+    {"name": "link-length-shorter2", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-length", 0.5)  },
+    {"name": "link-mass-lighter1", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-mass", 0.5)  },
+    {"name": "link-mass-lighter2", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-mass", 0.25)  },
+    {"name": "link-mass-heavier1", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-mass", 2)  },
+    {"name": "link-mass-heavier2", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-mass", 4)  },
+    {"name": "link-recurrence-higher1", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-recurrence", 4)  },
+    {"name": "link-recurrence-higher2", "log_interval": "EVERY_ITERATION", "Y": "MEAN_FITNESS_DELTA", "X":{"iterations": [1000]}, "GEN_CHANGE": ("link-recurrence", 5)  },
+
+]
+
 TEST_EXPERIMENTS_TO_RUN = [
                       "test",
                       "test2",
@@ -56,6 +71,21 @@ EXPERIMENTS_TO_RUN=  [
                       #"mutation_rate",
                       "mutation_rate2"
                     ]
+
+EXPERIMENTS_GENOME_TO_RUN = [
+    #"link-length-longer1",
+    #"link-length-longer2",
+    #"link-length-shorter1",
+    #"link-length-shorter2",
+    #"link-mass-lighter1",
+    #"link-mass-lighter2",
+    #"link-mass-heavier1",
+   # "link-mass-heavier2",
+    #"baseline",
+    #"link-recurrence-higher1",
+    "link-recurrence-higher2"
+]
+
 
 class HyperparamSearcher():
 
@@ -81,7 +111,7 @@ class HyperparamSearcher():
         raise Exception("Invalid metric")
 
     def find_exp_w_name(self, name):
-        for e in EXPERIMENTS:
+        for e in EXPERIMENTS_GENOME:
             if(e["name"] == name):
                 return e
         return None
@@ -105,6 +135,8 @@ class HyperparamSearcher():
 
     def run_experiment(self, experiment_name):
         experiment_params = self.find_exp_w_name(experiment_name)
+        if("GEN_CHANGE" in experiment_params):
+            genome.Genome.change_scale(experiment_params["GEN_CHANGE"][0], experiment_params["GEN_CHANGE"][1])
         params = DEFAULT_PARAMS.copy()
         X_dict = experiment_params["X"]
         X_prop = list(X_dict.keys())[0] if X_dict else None
@@ -144,6 +176,9 @@ class HyperparamSearcher():
         sim = simulation.ThreadedSim(pool_size=pool_size)
         #sim = simulation.Simulation()
         init_fitness = None
+        max_fitness =0
+        best_cr = None
+        iteration_best_cr = 0
         for iteration in range(no_iterations):
             sim.eval_population(pop, 2400)
             fits = [cr.get_distance_travelled()
@@ -171,12 +206,15 @@ class HyperparamSearcher():
             # elitism
             max_fit = np.max(fits)
             for cr in pop.creatures:
-                if cr.get_distance_travelled() == max_fit:
+                distance_travelled = cr.get_distance_travelled()
+                if distance_travelled == max_fit:
                     new_cr = creature.Creature(1)
                     new_cr.update_dna(cr.dna)
                     new_creatures[0] = new_cr
-                    filename = "genomes/elite_"+str(iteration)+".csv"
-                    genome.Genome.to_csv(cr.dna, filename)
+                    if distance_travelled > max_fitness:
+                        max_fitness = distance_travelled
+                        best_cr = cr
+                        iteration_best_cr = iteration
                     break
             if(iteration == 0):
                 init_fitness = self.get_mean_fitness(pop.creatures)
@@ -193,6 +231,9 @@ class HyperparamSearcher():
                 logs.append(record)
             last_evaluated_creatures = pop.creatures
             pop.creatures = new_creatures
+        filename = f"best_creatures/{experiment_params['name']}_{round(max_fitness,2)}_"+str(iteration_best_cr)+".csv"
+        print("saving best creature: ", filename)
+        genome.Genome.to_csv(best_cr.dna, filename)
         if(experiment_params["log_interval"] == "NORMAL"):
             metric = self.get_metric(hyperparams, experiment_params, last_evaluated_creatures, initial_fitness=init_fitness)
             record = {}
@@ -210,16 +251,16 @@ def store_exp_name(df, experiment_name, is_final=True):
     dir_name = None
     if(is_final):
         print("experiment finished: ", experiment_name)
-        dir_name = "hyperparam_search_V2"
+        dir_name = "hyperparam_search_gene_spec"
     else:
-        dir_name = "hyperparam_search_V2_WIP"
+        dir_name = "hyperparam_search_gene_spec_WIP"
     print("saving to CSV...")
     path = f"{dir_name}/{experiment_name}.csv"
     df.to_csv(path, index=False)
 
 if __name__ == '__main__':
     hs = HyperparamSearcher()
-    for experiment_name in EXPERIMENTS_TO_RUN:
+    for experiment_name in EXPERIMENTS_GENOME_TO_RUN:
         print("starting experiment: ", experiment_name)
         results_dataframe = hs.run_experiment(experiment_name)
         store_exp_name(results_dataframe, experiment_name)

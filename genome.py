@@ -2,24 +2,36 @@ import numpy as np
 import copy 
 import random
 
+changes_to_scale = {}
+
+
 class Genome():
     @staticmethod 
     def get_random_gene(length):
         gene = np.array([np.random.random() for i in range(length)])
         return gene
-    
-    @staticmethod 
+
+    @staticmethod
+    def change_scale(key, new_scale):
+        global changes_to_scale
+        changes_to_scale = {} # reset it, only change one at a time
+        changes_to_scale[key] = new_scale
+        print("after changes_to_scale: ", changes_to_scale)
+
+
+    @staticmethod
     def get_random_genome(gene_length, gene_count):
         genome = [Genome.get_random_gene(gene_length) for i in range(gene_count)]
         return genome
 
     @staticmethod
     def get_gene_spec():
-        gene_spec =  {"link-shape":{"scale":1}, 
-            "link-length": {"scale":2},
+        gene_spec =  {
+            "link-shape":{"scale": 1},
+            "link-length": {"scale": changes_to_scale.get("link-length", None) or 2},
             "link-radius": {"scale":1},
-            "link-recurrence": {"scale":3},
-            "link-mass": {"scale":1},
+            "link-recurrence": {"scale":changes_to_scale.get("link-recurrence", None) or 3},
+            "link-mass": {"scale": changes_to_scale.get("link-mass", None) or 1},
             "joint-type": {"scale":1},
             "joint-parent":{"scale":1},
             "joint-axis-xyz": {"scale":1},

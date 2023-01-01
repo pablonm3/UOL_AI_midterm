@@ -36,7 +36,7 @@ def main(csv_file):
     # iterate 
     elapsed_time = 0
     wait_time = 1.0/240 # seconds
-    total_time = 30 # seconds
+    total_time = 50 # seconds
     step = 0
     while True:
         p.stepSimulation()
